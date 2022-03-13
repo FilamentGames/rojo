@@ -15,12 +15,11 @@ where
     R: Read<'de>,
 {
     pub fn new(mut read: R) -> Self {
-        let d = Deserializer {
+        Deserializer {
             scratch: Vec::new(),
             read: &mut read,
             json_deserializer: serde_json::Deserializer::new(read),
-        };
-        return d;
+        }
     }
 }
 
