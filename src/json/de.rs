@@ -4,22 +4,27 @@ use serde_json::Result;
 
 // FIXME: None of this works yet
 
-pub struct Deserializer<R> {
+pub struct Deserializer<'r, R> {
+    read: &'r mut R,
+    scratch: Vec<u8>,
     json_deserializer: serde_json::Deserializer<R>,
 }
 
-impl<'de, R> Deserializer<R>
+impl<'de, 'r, R> Deserializer<'r, R>
 where
     R: Read<'de>,
 {
-    pub fn new(read: R) -> Self {
-        Deserializer {
+    pub fn new(mut read: R) -> Self {
+        let d = Deserializer {
+            scratch: Vec::new(),
+            read: &mut read,
             json_deserializer: serde_json::Deserializer::new(read),
-        }
+        };
+        return d;
     }
 }
 
-impl<'de, R: Read<'de>> Deserializer<R> {
+impl<'de, 'r, R: Read<'de>> Deserializer<'r, R> {
     pub fn end(&mut self) -> Result<()> {
         self.json_deserializer.end()
     }
@@ -46,9 +51,19 @@ impl<'de, R: Read<'de>> Deserializer<R> {
     }
 }
 
-impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R> {
-    type Error = Error;
+#[derive(std::fmt::Debug)]
+struct DummyError {}
 
+impl std::fmt::Display for DummyError {
+    fn fmt(&self, _: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        Ok(())
+    }
+}
+
+impl std::error::Error for DummyError {}
+
+impl<'de, 'a, 'r, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<'r, R> {
+    type Error = Error;
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
     where
@@ -127,18 +142,27 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
         let peek = match self.parse_whitespace()? {
             Some(b) => b,
             None => {
-                return Err(Error {});
+                return Err(Error::io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    DummyError {},
+                )));
             }
         };
 
         let value = match peek {
             b'"' => {
-                let value : String = serde_json::value::from_value(self.json_deserializer.deserialize_string(visitor)?)?;
+                self.eat_char();
+                self.scratch.clear();
+                let value = self.read.parse_str(&mut self.scratch)?;
 
-                match value {
+                match &*value {
                     "NaN" => return visitor.visit_f32(f32::NAN),
                     "Infinity" => return visitor.visit_f32(f32::INFINITY),
                     "-Infinity" => return visitor.visit_f32(f32::NEG_INFINITY),
+                    _ => return Err(Error::io(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        DummyError {},
+                    ))),
                 };
             }
             _ => return self.json_deserializer.deserialize_f32(visitor),
@@ -152,17 +176,27 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
         let peek = match self.parse_whitespace()? {
             Some(b) => b,
             None => {
-                return Err(Error {});
+                return Err(Error::io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    DummyError {},
+                )));
             }
         };
 
         let value = match peek {
             b'"' => {
-                let str = self.json_deserializer.deserialize_str(visitor)?;
-                match str {
+                self.eat_char();
+                self.scratch.clear();
+                let value = self.read.parse_str(&mut self.scratch)?;
+
+                match &*value {
                     "NaN" => return visitor.visit_f64(f64::NAN),
                     "Infinity" => return visitor.visit_f64(f64::INFINITY),
                     "-Infinity" => return visitor.visit_f64(f64::NEG_INFINITY),
+                    _ => return Err(Error::io(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        DummyError {},
+                    ))),
                 };
             }
             _ => return self.json_deserializer.deserialize_f64(visitor),
@@ -222,14 +256,16 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.json_deserializer.deserialize_unit_struct(name, visitor)
+        self.json_deserializer
+            .deserialize_unit_struct(name, visitor)
     }
 
     fn deserialize_newtype_struct<V>(self, name: &'static str, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.json_deserializer.deserialize_newtype_struct(name, visitor)
+        self.json_deserializer
+            .deserialize_newtype_struct(name, visitor)
     }
 
     fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value>
@@ -255,7 +291,8 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.json_deserializer.deserialize_tuple_struct(name, len, visitor)
+        self.json_deserializer
+            .deserialize_tuple_struct(name, len, visitor)
     }
 
     fn deserialize_map<V>(self, visitor: V) -> Result<V::Value>
@@ -274,7 +311,8 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.json_deserializer.deserialize_struct(name, fields, visitor)
+        self.json_deserializer
+            .deserialize_struct(name, fields, visitor)
     }
 
     fn deserialize_enum<V>(
@@ -286,7 +324,8 @@ impl<'de, 'a, R: Read<'de>> serde::Deserializer<'de> for &'a mut Deserializer<R>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.json_deserializer.deserialize_enum(name, variants, visitor)
+        self.json_deserializer
+            .deserialize_enum(name, variants, visitor)
     }
 
     fn deserialize_identifier<V>(self, visitor: V) -> Result<V::Value>
