@@ -1,7 +1,7 @@
 use hyper::{header::CONTENT_TYPE, Body, Response, StatusCode};
 use serde::Serialize;
 use crate::{
-    web::ser
+    json::ser
 };
 
 pub fn json_ok<T: Serialize>(value: T) -> Response<Body> {

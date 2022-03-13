@@ -21,6 +21,7 @@ mod session_id;
 mod snapshot;
 mod snapshot_middleware;
 mod web;
+mod json;
 
 pub use project::*;
 pub use session_id::SessionId;

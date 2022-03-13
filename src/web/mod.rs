@@ -7,7 +7,6 @@ mod assets;
 pub mod interface;
 mod ui;
 mod util;
-mod ser;
 
 use std::convert::Infallible;
 use std::net::SocketAddr;
