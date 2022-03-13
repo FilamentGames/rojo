@@ -1,0 +1,43 @@
+---
+source: tests/tests/serve.rs
+expression: "read_response.intern_and_redact(&mut redactions, root_id)"
+
+---
+instances:
+  id-2:
+    Children:
+      - id-3
+    ClassName: DataModel
+    Id: id-2
+    Metadata:
+      ignoreUnknownInstances: true
+    Name: ieee_754
+    Parent: "00000000000000000000000000000000"
+    Properties: {}
+  id-3:
+    Children:
+      - id-4
+    ClassName: Workspace
+    Id: id-3
+    Metadata:
+      ignoreUnknownInstances: true
+    Name: Workspace
+    Parent: id-2
+    Properties: {}
+  id-4:
+    Children: []
+    ClassName: Vector3Value
+    Id: id-4
+    Metadata:
+      ignoreUnknownInstances: true
+    Name: Test
+    Parent: id-3
+    Properties:
+      Value:
+        Vector3:
+          - -.inf
+          - .inf
+          - .nan
+messageCursor: 0
+sessionId: id-1
+

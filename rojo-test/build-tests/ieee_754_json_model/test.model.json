@@ -1,0 +1,16 @@
+{
+  "ClassName": "Folder",
+  "Children": [
+    {
+      "Name": "Test",
+      "ClassName": "Vector3Value",
+      "Properties": {
+        "Value": [
+          "-Infinity",
+          "Infinity",
+          "NaN"
+        ]
+      }
+    }
+  ]
+}
