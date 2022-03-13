@@ -112,4 +112,4 @@ tempfile = "3.2.0"
 walkdir = "2.3.2"
 
 [patch.crates-io]
-serde_json = { git = 'https://github.com/FilamentGames/json' }
+serde_json = { git = 'https://github.com/FilamentGames/json', tag = "v1.0.79" }

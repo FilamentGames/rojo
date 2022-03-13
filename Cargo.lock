@@ -2424,7 +2424,7 @@ dependencies = [
 [[package]]
 name = "serde_json"
 version = "1.0.79"
-source = "git+https://github.com/FilamentGames/json#2733e635b32fa9c10d1d8ef8c224b6aa405727d3"
+source = "git+https://github.com/FilamentGames/json?tag=v1.0.79#34a178b0edf5283ca4aa583c2ef410c23f828d2a"
 dependencies = [
  "itoa 1.0.1",
  "ryu",
