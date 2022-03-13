@@ -110,3 +110,6 @@ pretty_assertions = "0.7.2"
 serde_yaml = "0.8.21"
 tempfile = "3.2.0"
 walkdir = "2.3.2"
+
+[patch.crates-io]
+serde_json = { git = 'https://github.com/FilamentGames/json' }
