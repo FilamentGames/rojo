@@ -220,3 +220,18 @@ fn empty_json_model() {
         );
     });
 }
+
+#[test]
+fn ieee_754() {
+    run_serve_test("ieee_754", |session, mut redactions| {
+        let info = session.get_api_rojo().unwrap();
+        let root_id = info.root_instance_id;
+
+        let read_response = session.get_api_read(root_id).unwrap();
+
+        assert_yaml_snapshot!(
+            "ieee_754",
+            read_response.intern_and_redact(&mut redactions, root_id)
+        );
+    });
+}
