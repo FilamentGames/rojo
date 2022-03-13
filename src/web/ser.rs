@@ -123,7 +123,7 @@ where
                 self.json_serializer.serialize_str("NaN")
             }
             FpCategory::Infinite => {
-                if (v == f32::INFINITY) {
+                if v == f32::INFINITY {
                     self.json_serializer.serialize_str("Infinity")
                 } else {
                     self.json_serializer.serialize_str("-Infinity")
@@ -141,7 +141,7 @@ where
                 self.json_serializer.serialize_str("NaN")
             }
             FpCategory::Infinite => {
-                if (v == f64::INFINITY) {
+                if v == f64::INFINITY {
                     self.json_serializer.serialize_str("Infinity")
                 } else {
                     self.json_serializer.serialize_str("-Infinity")
