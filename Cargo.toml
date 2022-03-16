@@ -110,3 +110,10 @@ pretty_assertions = "0.7.2"
 serde_yaml = "0.8.21"
 tempfile = "3.2.0"
 walkdir = "2.3.2"
+
+[patch.crates-io]
+rbx_binary = { git = 'https://github.com/FilamentGames/rbx-dom', branch = 'package-link' }
+rbx_dom_weak = { git = 'https://github.com/FilamentGames/rbx-dom', branch = 'package-link' }
+rbx_reflection = { git = 'https://github.com/FilamentGames/rbx-dom', branch = 'package-link' }
+rbx_reflection_database = { git = 'https://github.com/FilamentGames/rbx-dom', branch = 'package-link' }
+rbx_xml = { git = 'https://github.com/FilamentGames/rbx-dom', branch = 'package-link' }
